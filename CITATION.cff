@@ -8,6 +8,7 @@ type: report
 authors:
   - name: Math Fournity
     email: math-fournity@proton.me
+  - name: Step-5-Preview
   - name: GLM-5.3
 repository-code: "https://github.com/math-fournity/cn.cyberIdentity.certification"
 abstract: >-

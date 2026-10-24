@@ -62,7 +62,7 @@ xxd -s 0x491019 -l 48 apk_x/lib/arm64-v8a/libcloudwalk_sdk.so
 
 ```bibtex
 @misc{nia-audit-2026,
-  author       = {Math Fournity and GLM-5.3},
+  author       = {Math Fournity and Step-5-Preview and GLM-5.3},
   title        = {《国家网络身份认证》App（cn.cyberIdentity.certification v1.2.40）
                   密码学使用与安全工程问题调查报告},
   year         = {2026},
