@@ -8,7 +8,7 @@ message: >-
   APK fingerprint (SHA-256 1b6368cf320d68b7aa6eab67c458cf1f5849ed9da079f1741d8a41f6553dfedf).
 type: report
 authors:
-  - name: math-fournity
+  - name: Math Fournity
     email: math-fournity@proton.me
   - name: GLM-5.3
 repository-code: "https://github.com/math-fournity/cn.cyberIdentity.certification"

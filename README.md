@@ -69,7 +69,7 @@ xxd -s 0x491019 -l 48 apk_x/lib/arm64-v8a/libcloudwalk_sdk.so
 
 ```bibtex
 @misc{nia-audit-2026,
-  author       = {math-fournity and GLM-5.3},
+  author       = {Math Fournity and GLM-5.3},
   title        = {Security Audit of the National Network Identity Authentication
                   Android Client (cn.cyberIdentity.certification v1.2.40):
                   Cryptography Use and Security-Engineering Deficiencies},
