@@ -13,7 +13,7 @@
 
 | # | 主张 | 证据强度 | 责任主体 |
 |---|---|---|---|
-| **P1** | 其人脸活体 SDK（云从科技出品）生产库内存在**硬编码明文 SM4 密钥**，其中一把为自述"测试钥" | 指令级（含二进制地址，§3.1） | 云从科技（科创板 688327） |
+| **P1** | 其人脸活体 SDK（云从科技出品）生产库 `.data` 段内置 **5 个密钥存储位、4 个不同 SM4 密钥值**（编译期固定，其中一把自述"测试钥"），全部经 GOT 重定位被代码引用（合计 16 处指令点） | 指令级（含二进制地址与普查表，§3.1） | 云从科技（科创板 688327） |
 | **P2** | 同库编入 SM4 与 AES 的 **ECB 工作模式**原语且存在实际调用 | 指令级（§3.2） | 云从科技 |
 | **P3** | App 业务层存在**密钥种子可打印的调试日志面**（发布剥离缺失） | 静态字符串证据（§3.3） | App 开发/集成方体系 |
 | **P4** | App 加固壳仅覆盖业务代码的 33%，**全部安全配置位于未保护区** | 结构测量（§3.4） | App 开发/集成方（采购验收责任） |
@@ -48,13 +48,22 @@ native 库分析（LLVM 工具链 `llvm-nm`/`llvm-objdump` + 任意十六进制�
 
 **位置**：`lib/arm64-v8a/libcloudwalk_sdk.so`（4.6MB，云从科技活体/OCR SDK）。
 
-`.data` 段密钥族（文件偏移，任一十六进制编辑器可直接核对）：
+`.data` 段密钥普查（符号表 × 字节直读 × GOT 重定位 × 指令引用点，四重取证；
+文件偏移，任一十六进制编辑器可直接核对；armeabi-v7a 版同值在场）：
 
-| 偏移 | 字节内容（ASCII） | 说明 |
-|---|---|---|
-| **0x49103a** | `cw121sm095ewgfhn`（16 字节） | `key_bodgl`，加密函数的**默认钥路径**取用 |
-| **0x491019** | `cw_test_sm4_key_`（16 字节） | 变量名 `sm4Key`，**自述"测试钥"** |
-| 0x491008 / 0x49102a / 0x491064 | `CW_128EncryptKey` / 16 字节二进制钥 / 前者副本 | 同族密钥 |
+| 符号 | 偏移(file) | 值（16 字节） | 形态 | 指令引用点（adrp+ldr→GOT） |
+|---|---|---|---|---|
+| `aeSKey` | 0x491008 | `CW_128EncryptKey` | ASCII | 0x7d754, 0x7d7b4 |
+| `sm4Key` | 0x491019 | `cw_test_sm4_key_` | ASCII（自述测试钥） | 0x7da6c, 0x7da8c |
+| `key_boxal` | 0x49102a | `b5911fc279686d931203630d99f16e41` | 二进制 | 0x7da00, 0x7da10 |
+| `key_bodgl` | 0x49103a | `cw121sm095ewgfhn` | ASCII | **0x7deac**(sm4Enc 默认钥), 0x7da38, 0x7da60, 0x7df20 |
+| `key_bodgl1` | 0x491064 | `cw121sm095ewgfhn`（副本） | ASCII | 无 GOT 引用 |
+| `sm4Random16BitKey` | .bss | 运行期随机生成 | 缓冲区 | 6 处（含 0x86438 等） |
+
+**计数结论**：5 个密钥存储位，其中 **4 个编译期固定的 16 字节密钥值**（3 个 ASCII、
+1 个二进制；`key_bodgl1` 为 `key_bodgl` 同值副本），另有 1 个运行期随机钥缓冲。
+除副本外，**每个固定钥都有代码路径实际取用**（引用点落在密钥选择函数簇
+0x7d754-0x7da8c 与加密入口 0x7deac）。
 
 **取钥指令链**（反汇编地址 = 文件偏移）：
 
@@ -114,8 +123,47 @@ App 业务数据中的静态字符串（解包后可直接检索）：`pKseed (S
    https://github.com/emmansun/gmsm/blob/develop/docs/sm4.md
 5. **教科书口径**：https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation
    （ECB "lack of diffusion… fails to hide data patterns"）
-6. **P1 的依据**：硬编码密钥违反 OWASP MASVS-CRYPTO-2 与 GB/T 39786 密钥管理要求
-   ——此为业界共识，无需更多引文。
+6. **P1 的依据（密钥管理的规范要求，原文引用）**：
+   - **NIST SP 800-57 Part 1 Rev.5**《Key Management Recommendation》：
+     > "Secret and private keys need to be protected against **unauthorized
+     > disclosure**, and all keys need to be protected against modification."
+     > （对称密钥须防止未授权披露。）同文件并以规范语气要求："the keying material
+     > **shall** be protected…one or more of the appropriate protection mechanisms
+     > for stored information in Section 6.2.2 **shall** be used."
+     https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r5.pdf
+   - **OWASP MASVS-CRYPTO-2**（原文）：
+     > "The app performs key management according to industry best practices.
+     > **Even the strongest cryptography would be compromised by poor key
+     > management.** This control covers the management of cryptographic keys
+     > throughout their lifecycle, including key generation, **storage and
+     > protection**."
+     https://mas.owasp.org/controls/MASVS-CRYPTO-2/
+   - **GB/T 39786-2021**《信息系统密码应用基本要求》：密评基线对"密钥管理"
+     （生成、存储、分发、更换、销毁全生命周期）提出分级要求——静态评审中，
+     编译期固定对称密钥随公开分发包发布属密钥存储不符合项（标准正文以官方文本为准，
+     发布说明见 https://www.oscca.gov.cn/sca/xxgk/2021-03/19/content_1060852.shtml）。
+
+## 4b. 对预期反驳的回应："通信加密用的默认钥写在包里，不是也行吗？"
+
+**不行的理由不是偏好，是密码学的定义性质**：APK 是任何人可获取的公开分发物，
+写入其中的对称密钥对全世界公开。对称加密的保密性**完全依赖密钥的私密性**（上引
+NIST 原文即该原则的规范表述）——密钥公开后，"加密"对任何第三方退化为"编码"：
+任何人可解密历史流量/数据、可伪造合法密文。这不是"做得不够好"，是**该密钥参与的
+保密性主张不成立**。
+
+**正确的做法（且本 App 环境内三条路都是现成的）**：
+1. **会话密钥运行期随机生成**——该 SDK 自己就实现了这条路：`cwGetRandom16Sm4key`
+   （导出函数 @0x83ac0）与 `sm4Random16BitKey` 缓冲（6 处引用）证明厂商完全掌握
+   正确模式，固定钥族属于同一代码库中的反面并存；
+2. **密钥存入 Android Keystore**（设备绑定、不可导出）——Android 官方文档原文：
+   > "The Android Keystore system lets you store cryptographic keys in a container
+   > to make them **more difficult to extract from the device**. Once keys are in
+   > the keystore… the key material remaining **non-exportable**."
+   > （https://developer.android.com/privacy-and-security/keystore）
+   本 App minSdk 24，Keystore 自 API 18+ 可用，无任何兼容性障碍；
+3. **服务端密钥分发/服务端密码运算**——App 内已集成卫士通（电科网安）密码服务
+   平台 SDK（`cn.com.westone.wcspsdk`），即业界标准的"密钥不下发"架构，说明
+   供应链上正确的架构选项触手可及。
 
 ## 5. 责任归属
 
