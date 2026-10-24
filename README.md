@@ -2,17 +2,6 @@
 
 独立静态安全调查 · 报告自包含 · 全部主张可独立复算
 
-> **English abstract** — Independent static security audit of China's official
-> *National Network Identity Authentication* Android client (package
-> `cn.cyberIdentity.certification`, v1.2.40, signed by the First Research Institute
-> of the Ministry of Public Security). Findings include **hardcoded plaintext SM4
-> keys** (one self-described as a *test* key) and **ECB-mode primitives** in the
-> CloudWalk (STAR Market: 688327) face-liveness SDK shipped inside the app, an
-> **unstripped debug-log surface** including a key-seed print statement, and
-> **incomplete packer coverage** leaving all security-relevant configuration
-> outside the encrypted region. Every claim is tied to binary addresses and is
-> reproducible with public tooling (see *Reproduction* in the report).
-
 ---
 
 ## 调查对象身份（核验指纹）
@@ -64,15 +53,14 @@ xxd -s 0x491019 -l 48 apk_x/lib/arm64-v8a/libcloudwalk_sdk.so
 
 ## 引用（Citation）
 
-本 repo 提供 [`CITATION.cff`](CITATION.cff)（GitHub 会在 repo 首页显示
-"Cite this repository"）。BibTeX：
+本 repo 提供 [`CITATION.cff`](CITATION.cff)（GitHub 会在仓库首页显示"引用本仓库"按钮，
+引用信息以该文件为准）。BibTeX：
 
 ```bibtex
 @misc{nia-audit-2026,
   author       = {Math Fournity and GLM-5.3},
-  title        = {Security Audit of the National Network Identity Authentication
-                  Android Client (cn.cyberIdentity.certification v1.2.40):
-                  Cryptography Use and Security-Engineering Deficiencies},
+  title        = {《国家网络身份认证》App（cn.cyberIdentity.certification v1.2.40）
+                  密码学使用与安全工程问题调查报告},
   year         = {2026},
   month        = {10},
   howpublished = {\url{https://github.com/math-fournity/cn.cyberIdentity.certification}},

@@ -1,11 +1,9 @@
 cff-version: 1.2.0
 title: >-
-  Security Audit of the National Network Identity Authentication Android Client
-  (cn.cyberIdentity.certification v1.2.40): Cryptography Use and
-  Security-Engineering Deficiencies
+  《国家网络身份认证》App（cn.cyberIdentity.certification v1.2.40）密码学使用与安全工程问题调查报告
 message: >-
-  If you use this audit report, please cite it as below and state the verified
-  APK fingerprint (SHA-256 1b6368cf320d68b7aa6eab67c458cf1f5849ed9da079f1741d8a41f6553dfedf).
+  引用本报告时请注明出处，并声明所核验的 APK 指纹（SHA-256
+  1b6368cf320d68b7aa6eab67c458cf1f5849ed9da079f1741d8a41f6553dfedf）。
 type: report
 authors:
   - name: Math Fournity
@@ -13,21 +11,19 @@ authors:
   - name: GLM-5.3
 repository-code: "https://github.com/math-fournity/cn.cyberIdentity.certification"
 abstract: >-
-  Independent static security audit of China's official National Network Identity
-  Authentication Android client. Findings: hardcoded plaintext SM4 keys (including
-  a self-described test key) and ECB-mode primitives in the CloudWalk (688327)
-  face-liveness SDK shipped inside the app; an unstripped debug-log surface
-  including a key-seed print statement; packer coverage of only 33% leaving all
-  security-relevant configuration outside the encrypted region. All claims are
-  tied to binary addresses and reproducible with public tooling.
+  对《国家网络身份认证》Android 客户端的独立静态安全调查。发现：App 所集成云从科技
+  （688327）人脸活体 SDK 内存在硬编码明文 SM4 密钥（含一把自述"测试钥"）与 ECB
+  工作模式原语；业务层存在含密钥种子打印语句的未剥离调试日志面；加固壳对业务代码
+  的加密覆盖仅 33%，全部安全配置位于未保护区。所有主张均落到二进制地址并可用公开
+  工具复算。
 keywords:
-  - security audit
+  - 安全调查
   - Android
   - SM4
-  - ECB mode
-  - hardcoded key
+  - ECB 工作模式
+  - 硬编码密钥
+  - 网络身份认证
   - CTID
-  - network identity authentication
 license: CC-BY-4.0
 date-released: "2026-10-24"
 version: "1.1"
