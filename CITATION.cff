@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+title: >-
+  Security Audit of the National Network Identity Authentication Android Client
+  (cn.cyberIdentity.certification v1.2.40): Cryptography Use and
+  Security-Engineering Deficiencies
+message: >-
+  If you use this audit report, please cite it as below and state the verified
+  APK fingerprint (SHA-256 1b6368cf320d68b7aa6eab67c458cf1f5849ed9da079f1741d8a41f6553dfedf).
+type: report
+authors:
+  - name: math-fournity
+    email: math-fournity@proton.me
+repository-code: "https://github.com/math-fournity/cn.cyberIdentity.certification"
+abstract: >-
+  Independent static security audit of China's official National Network Identity
+  Authentication Android client. Findings: hardcoded plaintext SM4 keys (including
+  a self-described test key) and ECB-mode primitives in the CloudWalk (688327)
+  face-liveness SDK shipped inside the app; an unstripped debug-log surface
+  including a key-seed print statement; packer coverage of only 33% leaving all
+  security-relevant configuration outside the encrypted region. All claims are
+  tied to binary addresses and reproducible with public tooling.
+keywords:
+  - security audit
+  - Android
+  - SM4
+  - ECB mode
+  - hardcoded key
+  - CTID
+  - network identity authentication
+license: CC-BY-4.0
+date-released: "2026-10-24"
+version: "1.0"
+language: zh
