@@ -10,6 +10,7 @@ type: report
 authors:
   - name: math-fournity
     email: math-fournity@proton.me
+  - name: GLM-5.3
 repository-code: "https://github.com/math-fournity/cn.cyberIdentity.certification"
 abstract: >-
   Independent static security audit of China's official National Network Identity
@@ -29,5 +30,5 @@ keywords:
   - network identity authentication
 license: CC-BY-4.0
 date-released: "2026-10-24"
-version: "1.0"
+version: "1.1"
 language: zh
