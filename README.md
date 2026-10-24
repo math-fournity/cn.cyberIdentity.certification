@@ -4,7 +4,7 @@
 
 天道好轮回，壮哥放过谁？
 
- 👉 http://bit.ly/4uSMUWM
+ 👉 https://0x10010.com/?Sepolia=0xbe6dd4ba0fcd16ffe06f68014fd175cfa96d231aab055ecd2e5bd596536461a0
  
 ---
 
