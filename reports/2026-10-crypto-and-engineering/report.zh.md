@@ -80,6 +80,49 @@ native 库分析（LLVM 工具链 `llvm-nm`/`llvm-objdump` + 任意十六进制�
 **主张的精确边界**：默认钥路径在指令级存在且可达 + 测试钥随生产包发布。
 不主张"每次加密都使用该钥"（运行期分支占比需动态观测）。
 
+### P1b 密钥用途语义判定：是加密钥，不是 SSL pinning 材料
+
+**预期反驳**："这些值可能是 pinning 用的——服务端下发公钥后，客户端比对预置值确认公钥
+合法性，再用于通信。"**三级指令级证据证明不是**：
+
+**第一级（定义性判别）**：pinning 的语义是**比对**（对收到的证书/公钥做哈希后与预置值
+memcmp/strcmp），被验证值**永远不会进入密钥扩展函数**。而本案 16 个密钥引用点全部
+落在加解密/上下文初始化函数中——`key_bodgl`/`sm4Key`/`key_boxal` 的 10 处引用全部位于
+`createSm4Context`（密钥选择与上下文初始化）与 `sm4Enc`（加密入口）内，`aeSKey` 的
+2 处位于 `aesEncHackStr`/`aesDecHackStr`（AES 加/解密）内；这些值被送入
+`sm4_setkey_enc`（SM4 **密钥编排**——把 16 字节扩展成轮密钥），这是"作为加密密钥使用"
+的定义性动作。
+
+**第二级（完整数据通路）**：JNI 导出的 `cwSm4Enc` → `sm4Enc` 函数体内，从取钥到加密
+数据一气呵成（同一函数、连续指令）：
+
+```
+0x7dea8  cbz x24              ← 调用方未传钥分支
+0x7deac  ldr x1, [GOT→key_bodgl]   ← 取硬编码钥
+0x7deb8  bl sm4_setkey_enc         ← 密钥编排
+0x7df34  bl createSm4Context       ← 加密上下文
+0x7df48  ldr x3, [x19, #0x28]      ← 输入数据缓冲
+0x7df5c  bl sm4_crypt_ecb          ← 对数据执行 ECB 加密，密文返回 Java 层
+```
+
+同族旁证：`sm4EncHackStr`→`bl sm4_crypt_ecb`@0x7dc38、**`sm4DecHackStr`→`bl
+sm4_crypt_ecb`@0x7dd78（解密）**、`sm4EncHackStrWithRandomKey`→ecb@0x83ca4、
+`wMd5Sm4`→cbc@0x861b8——全是数据加/解密函数（输入输出为 Java 字符串），不是证书
+校验。库里唯一带比对语义的 `verifyEnc`（@0x7d1fc）也是**先用 SM4-ECB 加密再 MD5 再
+strcmp**——密钥依然用于加密，而非 pinning 式的原值比对。
+
+**第三级（对照：本 App 真正的 pinning 材料长什么样）**：App 的 Java 层存在标准
+okhttp 证书锁定机制（串池含 `certificatePinner`、`checkServerTrusted` 等），其 pin
+材料形态为 **64 位十六进制 SHA-256 常量**（`F824FB52…BFF`，dex 串池在案）——哈希、
+经 CertificatePinner 比对。与本案发现的 **16 字节（32 hex）原始密钥、在 native 层被
+密钥编排**相比：形态不同、机制不同、代码路径不同。**两者并存且互不相干。**
+
+**主张的精确边界**：已证——这些密钥用于**数据加解密**（jstring 输入 → SM4-ECB 密文
+输出）。密文是否上行网络（"加密通信内容"的严格含义）需调用方上下文（位于 33% 加密
+区内）；但 `cwGetEncryptDataAndPubkeyIndex`（加密数据+公钥索引，@0x86a94，内部用
+time/srand/rand 生成随机量）等按合作方命名的数据交换函数强烈指示通信用途。
+本报告主张为"数据加解密"，"通信加密"列为高似然待运行期确认。
+
 ### P2 ECB 工作模式
 
 - `sm4_crypt_ecb` @ **0x7e40c**（导出符号），实际调用点 **0x7d2c8** 与 **0x7dc38**（`bl` 指令）
