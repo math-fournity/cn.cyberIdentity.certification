@@ -24,7 +24,7 @@
 
 | 目录 | 内容 |
 |---|---|
-| [`reports/2026-10-crypto-and-engineering/`](reports/2026-10-crypto-and-engineering/report.zh.md) | **2026-10：密码学使用与安全工程问题调查报告**（公开版 v1.0，中文）——四项主张、逐项二进制地址、规范原文引用、责任归属、审慎声明（明确不指控清单）、公开工具复现指南 |
+| [`reports/2026-10-crypto-and-engineering/`](reports/2026-10-crypto-and-engineering/report.zh.md) | **2026-10：密码学使用与安全工程问题调查报告**（公开版 v1.1，中文）——四项主张、逐项二进制地址、规范原文引用、责任归属、审慎声明（明确不指控清单）、公开工具复现指南 |
 
 后续调查报告（如加密区分析、动态观测）将以独立目录追加。
 
@@ -51,7 +51,7 @@ xxd -s 0x491019 -l 48 apk_x/lib/arm64-v8a/libcloudwalk_sdk.so
 # 0x491019 → "cw_test_sm4_key_" ; 0x49103a → "cw121sm095ewgfhn"
 ```
 
-## 引用（Citation）
+## 引用
 
 本 repo 提供 [`CITATION.cff`](CITATION.cff)（GitHub 会在仓库首页显示"引用本仓库"按钮，
 引用信息以该文件为准）。BibTeX：
@@ -64,7 +64,7 @@ xxd -s 0x491019 -l 48 apk_x/lib/arm64-v8a/libcloudwalk_sdk.so
   year         = {2026},
   month        = {10},
   howpublished = {\url{https://github.com/math-fournity/cn.cyberIdentity.certification}},
-  note         = {Static analysis; APK SHA-256
+  note         = {静态分析；APK SHA-256
                   1b6368cf320d68b7aa6eab67c458cf1f5849ed9da079f1741d8a41f6553dfedf}
 }
 ```
@@ -72,7 +72,7 @@ xxd -s 0x491019 -l 48 apk_x/lib/arm64-v8a/libcloudwalk_sdk.so
 引用规范要求：注明出处（作者+URL+版本日期），并**同时注明所核验的 APK 指纹**——
 本 repo 的结论仅对上述指纹的样本负责。
 
-## 许可（License）
+## 许可
 
 本 repo 的**报告文本与文档**采用
 [Creative Commons Attribution 4.0 International (CC BY 4.0)](LICENSE) 许可：
